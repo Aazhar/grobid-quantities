@@ -11,6 +11,7 @@ import org.grobid.service.configuration.GrobidQuantitiesConfiguration;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import javax.ws.rs.core.*;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -64,29 +65,68 @@ public class AnnotationController {
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Produces(MediaType.APPLICATION_JSON)
     @POST
-    public String processPDF(@FormDataParam("input") InputStream uploadedInputStream,
-                             @FormDataParam("input") FormDataContentDisposition fileDetail) {
-        MeasurementsResponse response = engine.processPdf(uploadedInputStream);
-        return response.toJson();
+    public Response processPDF(@FormDataParam("input") InputStream uploadedInputStream,
+                               @FormDataParam("input") FormDataContentDisposition fileDetail) {
+        MeasurementsResponse measurementsResponse = engine.processPdf(uploadedInputStream);
+        String json = measurementsResponse.toJson();
+        Response response = null;
+        if (json == null) {
+            response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+        } else {
+            response = Response
+                .status(Response.Status.OK)
+                .entity(json)
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON + "; charset=UTF-8")
+                .header("Access-Control-Allow-Origin", "*")
+                .header("Access-Control-Allow-Methods", "GET, POST, DELETE, PUT")
+                .build();
+        }
+        return response;
     }
 
     @Path(PATH_QUANTITY_TEXT)
     @Produces(MediaType.APPLICATION_JSON)
     @POST
-    public String processText(@FormDataParam("text") String text) {
+    public Response processText(@FormDataParam("text") String text) {
 
-        MeasurementsResponse response = engine.processText(text);
+        MeasurementsResponse measurementsResponse = engine.processText(text);
 
-        return response.toJson();
+        String json = measurementsResponse.toJson();
+        Response response = null;
+        if (json == null) {
+            response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+        } else {
+            response = Response
+                .status(Response.Status.OK)
+                .entity(json)
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON + "; charset=UTF-8")
+                .header("Access-Control-Allow-Origin", "*")
+                .header("Access-Control-Allow-Methods", "GET, POST, DELETE, PUT")
+                .build();
+        }
+        return response;
     }
 
     @Path(PATH_PARSE_MEASURE)
     @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
     @POST
-    public String parseMeasure_post(String json) {
-        MeasurementsResponse response = engine.processJson(json);
+    public Response parseMeasure_post(String json) {
+        MeasurementsResponse measurementsResponse = engine.processJson(json);
 
-        return response.toJson();
+        String measurementsJson = measurementsResponse.toJson();
+        Response response = null;
+        if (json == null) {
+            response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+        } else {
+            response = Response
+                .status(Response.Status.OK)
+                .entity(measurementsJson)
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON + "; charset=UTF-8")
+                .header("Access-Control-Allow-Origin", "*")
+                .header("Access-Control-Allow-Methods", "GET, POST, DELETE, PUT")
+                .build();
+        }
+        return response;
     }
 
     @Path(PATH_UNITS_TEXT)
